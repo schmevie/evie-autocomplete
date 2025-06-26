@@ -1,9 +1,14 @@
 import {AutoFocusPlugin} from '@lexical/react/LexicalAutoFocusPlugin';
 import {LexicalComposer} from '@lexical/react/LexicalComposer';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import {ContentEditable} from '@lexical/react/LexicalContentEditable';
 import {LexicalErrorBoundary} from '@lexical/react/LexicalErrorBoundary';
 import {HistoryPlugin} from '@lexical/react/LexicalHistoryPlugin';
 import {PlainTextPlugin} from '@lexical/react/LexicalPlainTextPlugin';
+import React from 'react';
+import { $createLineBreakNode, $createParagraphNode, $createTextNode, $getRoot, $getSelection, $isRangeSelection, COMMAND_PRIORITY_LOW, EditorState, KEY_DOWN_COMMAND, KEY_TAB_COMMAND, ParagraphNode, SELECTION_CHANGE_COMMAND } from 'lexical';
+import { AutoCompletePlugin } from '../plugins/AutoCompletePlugin';
+
 
 const editorConfig = {
     namespace: 'Editor',
@@ -36,9 +41,7 @@ export default function Editor() {
                     />
                     <HistoryPlugin />
                     <AutoFocusPlugin />
-                    {
-                        //Place custom plugins in the ./plugins folder
-                    }
+                    <AutoCompletePlugin/>
                 </div>
             </div>
         </LexicalComposer>
