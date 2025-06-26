@@ -1,6 +1,6 @@
 import {  useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { $getSelection, LexicalEditor, TextNode, RangeSelection, $isRangeSelection } from "lexical";
-import { JSX, SetStateAction, useEffect, useState, Dispatch, useRef } from "react";
+import { LexicalEditor, TextNode } from "lexical";
+import { JSX, SetStateAction, useEffect, useState, Dispatch } from "react";
 import AutoCompleteBox from '../../components/AutoComplete/AutoCompleteBox';
 import getAutoCompleteSuggestionsMuse from "../../api/autoCompleteService";
 
