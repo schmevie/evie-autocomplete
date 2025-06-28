@@ -2066,6 +2066,7 @@ __metadata:
     react: ^19.0.0
     react-dom: ^19.0.0
     typescript: ~5.7.2
+    use-debounce: ^10.0.5
     vite: ^6.1.0
   languageName: unknown
   linkType: soft
@@ -2129,6 +2130,15 @@ __metadata:
   bin:
     update-browserslist-db: cli.js
   checksum: 088d2bad8ddeaeccd82d87d3f6d736d5256d697b725ffaa2b601dfd0ec16ba5fad20db8dcdccf55396e1a36194236feb69e3f5cce772e5be15a5e4261ff2815d
+  languageName: node
+  linkType: hard
+
+"use-debounce@npm:^10.0.5":
+  version: 10.0.5
+  resolution: "use-debounce@npm:10.0.5"
+  peerDependencies:
+    react: "*"
+  checksum: 8aa1c5bc1fc725031f9e255eac2e333b1ee8b52c1acfa2e675f1e5eae2f81eb2edc35467a8c52c4200cb064af42723b5fb9e46274813cc77a29f1d3a2a8b017c
   languageName: node
   linkType: hard
 

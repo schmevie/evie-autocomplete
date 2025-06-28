@@ -12,7 +12,8 @@
     "@lexical/react": "^0.24.0",
     "lexical": "^0.24.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "use-debounce": "^10.0.5"
   },
   "devDependencies": {
     "@types/react": "^19.0.8",
