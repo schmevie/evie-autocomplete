@@ -28,6 +28,7 @@ export default [
         MouseEvent: 'readonly',
         React: 'readonly',
         fetch: 'readonly',
+        HTMLElement: 'readonly',
       },
     },
     plugins: {

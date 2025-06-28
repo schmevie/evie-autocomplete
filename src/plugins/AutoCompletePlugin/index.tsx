@@ -1,5 +1,15 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { $createTextNode, LexicalEditor, TextNode } from 'lexical';
+import {
+  $createTextNode,
+  $getSelection,
+  $isRangeSelection,
+  COMMAND_PRIORITY_HIGH,
+  KEY_BACKSPACE_COMMAND,
+  KEY_DOWN_COMMAND,
+  LexicalEditor,
+  TextNode,
+} from 'lexical';
+import { AutoCompleteEntryNode } from '../../nodes/AutoCompleteEntryNode';
 import {
   JSX,
   SetStateAction,
@@ -121,10 +131,11 @@ const useAutoComplete = function (
   );
 
   useEffect(() => {
-    //NEED TO DEFINE NODE ONCE I CREATE IT
-    // if (!editor.hasNodes([AutoCompleteNode])) {
-    //     throw new Error('AutoComplete Plugin: AutoCompleteNote not registered');
-    // }
+    if (!editor.hasNodes([AutoCompleteEntryNode])) {
+      throw new Error(
+        'AutoComplete Plugin: AutoCompleteEntryNote not registered'
+      );
+    }
     editor.registerNodeTransform(TextNode, (node: TextNode) => {
       $textNodeTransform(
         node,
@@ -137,7 +148,82 @@ const useAutoComplete = function (
         debouncedFetchSuggestions
       );
     });
-  }, [editor, debouncedFetchSuggestions]);
+
+    editor.registerCommand(
+      KEY_BACKSPACE_COMMAND,
+      () => {
+        const selection = $getSelection();
+
+        if ($isRangeSelection(selection)) {
+          const anchor = selection.anchor;
+          const selectedNode = anchor.getNode();
+          if (selectedNode.getType() === 'autocomplete-entry') {
+            editor.update(() => {
+              const newTextNode = $createTextNode(' ');
+              selectedNode.replace(newTextNode);
+            });
+            return true;
+          }
+        }
+        return false;
+      },
+      COMMAND_PRIORITY_HIGH
+    );
+
+    editor.registerCommand(
+      KEY_DOWN_COMMAND,
+      (event: KeyboardEvent) => {
+        const selection = $getSelection();
+
+        if ($isRangeSelection(selection)) {
+          const anchor = selection.anchor;
+          const selectedNode = anchor.getNode();
+
+          if (
+            selectedNode.getType() === 'autocomplete-entry' &&
+            selection.isCollapsed()
+          ) {
+            if (event.key === ' ') {
+              //TODO - Adds an extra whitespace should trim
+              const newTextNode = $createTextNode(' ');
+              selectedNode.insertAfter(newTextNode);
+              newTextNode.select();
+              return true;
+            }
+            // if (event.key === 'ArrowLeft') {
+            //   selectedNode.selectStart();
+            // }
+            // if (event.key === 'ArrowRight') {
+            //   console.log('ARROW RIGHT');
+            //   console.log(selectedNode.getNextSibling());
+            //   // const nextSibling = selectedNode.getNextSibling();
+            //   // if (nextSibling) {
+            //   //   nextSibling.selectEnd();
+            //   //   return true;
+            //   // }
+            //   selectedNode.selectEnd();
+            // }
+
+            const allowed = ['Backspace', ' ', 'ArrowRight', 'ArrowLeft'];
+            if (!allowed.includes(event.key)) {
+              event.preventDefault();
+              return true;
+            }
+          }
+        }
+        return false;
+      },
+      COMMAND_PRIORITY_HIGH
+    );
+  }, [
+    editor,
+    debouncedFetchSuggestions,
+    setAutoCompleteOptions,
+    setRectangle,
+    targetAutoCompleteNodeRef,
+    lastHandledMatchRef,
+    isLoadingOptionsRef,
+  ]);
 };
 
 export const AutoCompletePlugin = function (): JSX.Element | null {
@@ -166,7 +252,6 @@ export const AutoCompletePlugin = function (): JSX.Element | null {
       editor.update(() => {
         const targetNode = targetAutoCompleteNodeRef.current;
         if (!targetNode) return;
-
         const match = $findAndGetMatchString(targetNode.getTextContent());
         if (match) {
           lastHandledMatchRef.current = { key: targetNode.getKey(), match };
@@ -190,13 +275,19 @@ export const AutoCompletePlugin = function (): JSX.Element | null {
           }
           //<>hello
           if (middle && right) {
-            middle.replace($createTextNode(right.getTextContent()));
+            if (value === '') {
+              value = right.getTextContent();
+            }
             right.remove();
+            const autoCompleteEntryNode = $createAutoCompleteEntryNode(value);
+            middle.replace(autoCompleteEntryNode);
+            const newTextNode = $createTextNode(' ');
+            autoCompleteEntryNode.insertAfter(newTextNode);
+            newTextNode.select();
             setRectangle(undefined);
             setAutoCompleteOptions([]);
             return;
           }
-
           left.remove();
           setRectangle(undefined);
           setAutoCompleteOptions([]);
@@ -212,18 +303,34 @@ export const AutoCompletePlugin = function (): JSX.Element | null {
 
         //something<>**NO SUGGESTIONS**
         if (value === '') {
-          middle.replace($createTextNode(right.getTextContent()));
+          const autoCompleteEntryNode = $createAutoCompleteEntryNode(
+            right.getTextContent()
+          );
+          middle.replace(autoCompleteEntryNode);
+          const newTextNode = $createTextNode(' ');
+          autoCompleteEntryNode.insertAfter(newTextNode);
+          newTextNode.select();
           right.remove();
           return;
         }
 
         //something<>hello
-        middle.replace($createTextNode(value));
+        const autoCompleteEntryNode = $createAutoCompleteEntryNode(value);
+        middle.replace(autoCompleteEntryNode);
+        const newTextNode = $createTextNode(' ');
+        autoCompleteEntryNode.insertAfter(newTextNode);
+        newTextNode.select();
         right.remove();
       });
     },
     [editor]
   );
+
+  const $createAutoCompleteEntryNode = function (
+    text: string
+  ): AutoCompleteEntryNode {
+    return new AutoCompleteEntryNode(text);
+  };
 
   return rectangle ? (
     <AutoCompleteBox

@@ -3,12 +3,13 @@ import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
-import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin';
 import { AutoCompletePlugin } from '../plugins/AutoCompletePlugin';
+import { AutoCompleteEntryNode } from '../nodes/AutoCompleteEntryNode';
+import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 
 const editorConfig = {
   namespace: 'Editor',
-  nodes: [],
+  nodes: [AutoCompleteEntryNode],
   // Handling of errors during update
   onError(error: Error) {
     throw error;
@@ -18,6 +19,7 @@ const editorConfig = {
     ltr: 'ltr',
     paragraph: 'editor-paragraph',
     rtl: 'rtl',
+    autoCompleteEntry: 'autocomplete-entry',
   },
 };
 
@@ -26,7 +28,7 @@ export default function Editor() {
     <LexicalComposer initialConfig={editorConfig}>
       <div className="editor-container">
         <div className="editor-inner">
-          <PlainTextPlugin
+          <RichTextPlugin
             contentEditable={
               <ContentEditable
                 className="editor-input"

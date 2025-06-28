@@ -76,3 +76,9 @@ body {
 .editor-paragraph:last-child {
   margin-bottom: 0;
 }
+
+.autocomplete-entry {
+  color: blue;
+  user-select: all;
+  cursor: pointer;
+}

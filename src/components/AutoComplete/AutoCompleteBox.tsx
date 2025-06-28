@@ -71,7 +71,7 @@ export default function AutoCompleteBox({
       return true; // handled, so no further processing
     }
 
-    onUpdateSelected(selected);
+    onUpdateSelected(selected.trimEnd());
     event.preventDefault();
     return true;
   };
@@ -90,7 +90,7 @@ export default function AutoCompleteBox({
               onClick={() => {
                 onUpdateSelected(word);
               }}
-              className={i === 0 ? 'selected' : ''}
+              className={i === 0 ? styles.selected : ''}
               key={i}
             >
               {word}
