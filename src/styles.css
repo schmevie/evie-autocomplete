@@ -13,8 +13,13 @@ body {
 }
 
 .App {
-  font-family: sans-serif;
+  /* font-family: sans-serif; */
   text-align: center;
+
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+
 }
 
 .rtl {
@@ -22,7 +27,7 @@ body {
 }
 
 .editor-container {
-  margin: 20px auto 20px auto;
+  /* margin: 20px auto 20px auto; */
   border-radius: 2px;
   max-width: 600px;
   color: #000;
@@ -40,14 +45,14 @@ body {
 }
 
 .editor-input {
-  min-height: 150px;
+  min-height: 235px;
   resize: none;
-  font-size: 15px;
+  font-size: 25px;
   caret-color: rgb(5, 5, 5);
   position: relative;
   tab-size: 1;
   outline: 0;
-  padding: 15px 10px;
+  /* padding: 15px 10px; */
   caret-color: #444;
 }
 
@@ -81,4 +86,10 @@ body {
   color: blue;
   user-select: all;
   cursor: pointer;
+}
+
+.main {
+    height: 100vh;     /* lock height to viewport*/
+    margin: 0;         /* remove default spacing */
+    overflow: hidden;  /*prevent scrolling */
 }

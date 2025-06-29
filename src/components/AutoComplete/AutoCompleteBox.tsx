@@ -1,4 +1,4 @@
-import React, { JSX, useEffect, useRef } from 'react';
+import React, { JSX, useEffect, useRef, useState } from 'react';
 import styles from './styles.module.css';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import {
@@ -36,15 +36,17 @@ export default function AutoCompleteBox({
   const optionsRef = useRef(options);
   const selectedIndexRef = useRef(0);
   const itemRefs = useRef<{ [key: number]: any | null }>({});
-  // const [selectedIndex, setSelectedIndex] = useState<number>(0);
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const boxRef = useRef<any>(null);
 
   useEffect(() => {
     if (options.length > 0) {
       selectedStringRef.current = options[0];
+      selectedIndexRef.current = 0;
+      setSelectedIndex(0);
     }
     optionsRef.current = options;
-  }, [options]);
+  }, [options, selectedIndexRef]);
 
   useEffect(() => {
     if (!editor) return;
@@ -135,6 +137,7 @@ export default function AutoCompleteBox({
     const selection = $getSelection();
 
     if ($isRangeSelection(selection)) {
+      console.log('helllo');
       const anchor = selection.anchor;
       const node = anchor.getNode();
 
@@ -161,6 +164,8 @@ export default function AutoCompleteBox({
     selectedIndexRef.current -= 1;
 
     const selectedIndex = selectedIndexRef.current;
+    setSelectedIndex(selectedIndex);
+
     const listItem = itemRefs.current[selectedIndex];
     const previousItem = itemRefs.current[selectedIndex + 1];
 
@@ -178,6 +183,7 @@ export default function AutoCompleteBox({
     selectedIndexRef.current += 1;
 
     const selectedIndex = selectedIndexRef.current;
+    setSelectedIndex(selectedIndex);
 
     const listItem = itemRefs.current[selectedIndex];
     const previousItem = itemRefs.current[selectedIndex - 1];
@@ -204,7 +210,7 @@ export default function AutoCompleteBox({
               onClick={() => {
                 onUpdateSelected(word);
               }}
-              className={i === 0 ? styles.selected : ''}
+              className={i === selectedIndex ? styles.selected : ''}
               ref={el => {
                 itemRefs.current[i] = el;
               }}
