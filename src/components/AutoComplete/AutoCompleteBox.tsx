@@ -1,4 +1,4 @@
-import React, { JSX, useEffect, useState, useRef } from 'react';
+import React, { JSX, useEffect, useRef } from 'react';
 import styles from './styles.module.css';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import {
@@ -9,7 +9,6 @@ import {
   KEY_ARROW_DOWN_COMMAND,
   KEY_ARROW_LEFT_COMMAND,
   KEY_ARROW_UP_COMMAND,
-  KEY_DOWN_COMMAND,
   KEY_ENTER_COMMAND,
   KEY_TAB_COMMAND,
 } from 'lexical';
@@ -206,7 +205,9 @@ export default function AutoCompleteBox({
                 onUpdateSelected(word);
               }}
               className={i === 0 ? styles.selected : ''}
-              ref={el => (itemRefs.current[i] = el)}
+              ref={el => {
+                itemRefs.current[i] = el;
+              }}
               key={i}
             >
               {word}
