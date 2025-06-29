@@ -1,7 +1,18 @@
 import React, { JSX, useEffect, useState, useRef } from 'react';
 import styles from './styles.module.css';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { COMMAND_PRIORITY_LOW, KEY_ENTER_COMMAND } from 'lexical';
+import {
+  $getSelection,
+  $isRangeSelection,
+  $isTextNode,
+  COMMAND_PRIORITY_LOW,
+  KEY_ARROW_DOWN_COMMAND,
+  KEY_ARROW_LEFT_COMMAND,
+  KEY_ARROW_UP_COMMAND,
+  KEY_DOWN_COMMAND,
+  KEY_ENTER_COMMAND,
+  KEY_TAB_COMMAND,
+} from 'lexical';
 
 type AutoCompleteBoxParams = {
   options: string[];
@@ -22,14 +33,16 @@ export default function AutoCompleteBox({
   isLoadingRef,
 }: AutoCompleteBoxParams): JSX.Element | null {
   const [editor] = useLexicalComposerContext();
-  const [selectedString, setSelectedString] = useState<string>();
-  const selectedStringRef = useRef(selectedString);
+  const selectedStringRef = useRef('');
   const optionsRef = useRef(options);
+  const selectedIndexRef = useRef(0);
+  const itemRefs = useRef<{ [key: number]: any | null }>({});
+  // const [selectedIndex, setSelectedIndex] = useState<number>(0);
+  const boxRef = useRef<any>(null);
 
   useEffect(() => {
     if (options.length > 0) {
       selectedStringRef.current = options[0];
-      setSelectedString(() => options[0]);
     }
     optionsRef.current = options;
   }, [options]);
@@ -45,15 +58,58 @@ export default function AutoCompleteBox({
     const unregisterEnterCommand = editor.registerCommand(
       KEY_ENTER_COMMAND,
       (event: KeyboardEvent) => {
-        return handleEnterCommand(event);
+        return handleSelectionCommands(event);
       },
       COMMAND_PRIORITY_LOW
     );
 
+    const unregisterTabCommand = editor.registerCommand(
+      KEY_TAB_COMMAND,
+      (event: KeyboardEvent) => {
+        return handleSelectionCommands(event);
+      },
+      COMMAND_PRIORITY_LOW
+    );
+
+    const unregisterLeftArrowCommand = editor.registerCommand(
+      KEY_ARROW_LEFT_COMMAND,
+      (event: KeyboardEvent) => {
+        return handleLeftArrowCommand(event);
+      },
+      COMMAND_PRIORITY_LOW
+    );
+
+    const unregisterUpArrowCommand = editor.registerCommand(
+      KEY_ARROW_UP_COMMAND,
+      (event: KeyboardEvent) => {
+        return handleUpArrowCommand(event);
+      },
+      COMMAND_PRIORITY_LOW
+    );
+
+    const unregisterDownArrowCommand = editor.registerCommand(
+      KEY_ARROW_DOWN_COMMAND,
+      (event: KeyboardEvent) => {
+        return handleDownArrowCommand(event);
+      },
+      COMMAND_PRIORITY_LOW
+    );
+
+    const handleClickOutside = function (event: any) {
+      if (boxRef.current && !boxRef.current.contains(event.target)) {
+        onUpdateSelected('');
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
     return () => {
-      unregisterEnterCommand(); // Clean up old command
-      //unregisterEnterComman()
-      //unregisterSpaceCommand();
+      unregisterEnterCommand();
+      document.removeEventListener('mousedown', handleClickOutside);
+      unregisterLeftArrowCommand();
+      unregisterTabCommand();
+      unregisterUpArrowCommand();
+      unregisterDownArrowCommand();
     };
   }, [editor, onUpdateSelected]);
 
@@ -62,13 +118,13 @@ export default function AutoCompleteBox({
   const left = rectangle.left;
   const top = rectangle.y + 15;
 
-  const handleEnterCommand = function (event: KeyboardEvent): boolean {
+  const handleSelectionCommands = function (event: KeyboardEvent): boolean {
     const selected = selectedStringRef.current;
 
     if (optionsRef.current.length === 0 || !selected) {
       onUpdateSelected('');
       event.preventDefault();
-      return true; // handled, so no further processing
+      return true;
     }
 
     onUpdateSelected(selected.trimEnd());
@@ -76,10 +132,69 @@ export default function AutoCompleteBox({
     return true;
   };
 
+  const handleLeftArrowCommand = function (event: KeyboardEvent): boolean {
+    const selection = $getSelection();
+
+    if ($isRangeSelection(selection)) {
+      const anchor = selection.anchor;
+      const node = anchor.getNode();
+
+      if ($isTextNode(node)) {
+        const offset = anchor.offset;
+
+        if (offset > 0) {
+          const textContent = node.getTextContent();
+          const charToLeft = textContent[offset - 1];
+
+          if (charToLeft === '>') {
+            event.preventDefault();
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  };
+
+  const handleUpArrowCommand = function (event: KeyboardEvent): boolean {
+    event.preventDefault();
+    if (selectedIndexRef.current - 1 < 0) return false;
+    selectedIndexRef.current -= 1;
+
+    const selectedIndex = selectedIndexRef.current;
+    const listItem = itemRefs.current[selectedIndex];
+    const previousItem = itemRefs.current[selectedIndex + 1];
+
+    listItem.classList.add(styles.selected);
+    previousItem.classList.remove(styles.selected);
+
+    selectedStringRef.current = listItem.textContent;
+
+    return false;
+  };
+
+  const handleDownArrowCommand = function (event: KeyboardEvent): boolean {
+    event.preventDefault();
+    if (selectedIndexRef.current + 1 >= optionsRef.current.length) return false;
+    selectedIndexRef.current += 1;
+
+    const selectedIndex = selectedIndexRef.current;
+
+    const listItem = itemRefs.current[selectedIndex];
+    const previousItem = itemRefs.current[selectedIndex - 1];
+    listItem.classList.add(styles.selected);
+    previousItem.classList.remove(styles.selected);
+
+    selectedStringRef.current = listItem.textContent;
+
+    return false;
+  };
+
   console.log('LOADING REF', isLoadingRef.current);
   console.log('OPTIONS', options);
   return (
     <div
+      ref={boxRef}
       className={styles.autoCompleteBox}
       style={{ top: `${top}px`, left: `${left}px` }}
     >
@@ -91,6 +206,7 @@ export default function AutoCompleteBox({
                 onUpdateSelected(word);
               }}
               className={i === 0 ? styles.selected : ''}
+              ref={el => (itemRefs.current[i] = el)}
               key={i}
             >
               {word}
