@@ -35,6 +35,19 @@ const $findAndGetMatchString = function (text: string): null | string {
   return matchString;
 };
 
+const makeOptionsFun = function (options: Array<string>) {
+  const funTags = [`that's what she said`, `ya filthy animal!`, `it's giving`];
+
+  return options.map(option => {
+    const randomNumber = Math.floor(Math.random() * funTags.length);
+    const funTag = funTags[randomNumber];
+    if (randomNumber === 2) {
+      return `${funTag} ${option}`;
+    }
+    return `${option} ${funTag}`;
+  });
+};
+
 const $textNodeTransform = async function (
   node: TextNode,
   editor: LexicalEditor,
@@ -116,15 +129,27 @@ const useAutoComplete = function (
   setRectangle: Dispatch<SetStateAction<any>>,
   isLoadingOptionsRef: React.RefObject<boolean>,
   targetAutoCompleteNodeRef: React.RefObject<TextNode | undefined>,
-  lastHandledMatchRef: React.RefObject<{ key: string; match: string } | null>
+  lastHandledMatchRef: React.RefObject<{ key: string; match: string } | null>,
+  isFunMode: boolean
 ): void {
   //Use debouncing to get rid of multiple api calls on fast typing
   const debouncedFetchSuggestions = useDebouncedCallback(
     async (matchString: string) => {
       isLoadingOptionsRef.current = true;
       const getAutoCompleteOptionsFromApi =
-        await getAutoCompleteSuggestionsMuse({ autoCompleteWord: matchString });
-      setAutoCompleteOptions(getAutoCompleteOptionsFromApi.options);
+        await getAutoCompleteSuggestionsMuse({
+          autoCompleteWord: matchString,
+        });
+
+      if (isFunMode) {
+        const funOptions = makeOptionsFun(
+          getAutoCompleteOptionsFromApi.options
+        );
+        console.log(funOptions);
+        setAutoCompleteOptions(funOptions);
+      } else {
+        setAutoCompleteOptions(getAutoCompleteOptionsFromApi.options);
+      }
       isLoadingOptionsRef.current = false;
     },
     250 // delay in ms
@@ -226,7 +251,13 @@ const useAutoComplete = function (
   ]);
 };
 
-export const AutoCompletePlugin = function (): JSX.Element | null {
+type AutoCompletePluginParams = {
+  isFunMode: boolean;
+};
+
+export const AutoCompletePlugin = function ({
+  isFunMode,
+}: AutoCompletePluginParams): JSX.Element | null {
   const [editor] = useLexicalComposerContext();
   const [autoCompleteOptions, setAutoCompleteOptions] = useState<string[]>([]);
   const [rectangle, setRectangle] = useState<any>();
@@ -242,7 +273,8 @@ export const AutoCompletePlugin = function (): JSX.Element | null {
     setRectangle,
     isLoadingOptionsRef,
     targetAutoCompleteNodeRef,
-    lastHandledMatchRef
+    lastHandledMatchRef,
+    isFunMode
   );
 
   const handleUpdateSelected = useCallback(

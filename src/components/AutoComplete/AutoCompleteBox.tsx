@@ -50,12 +50,8 @@ export default function AutoCompleteBox({
 
   useEffect(() => {
     if (!editor) return;
-    //ABSTRAC THIS INTO ITS OWN FUCNTION NEED TO HANDLE
-    //UP AND DOWN
-    //LEFT AND RIGHT + COMMAND SHIFT LEFT AND RIGHT MIGHT BE SAME THING
-    //TAB
-    //SPACE
-    //CLICK OUTSIDE OF THE BOX
+
+    //COMMANDS - on editor get registered once
     const unregisterEnterCommand = editor.registerCommand(
       KEY_ENTER_COMMAND,
       (event: KeyboardEvent) => {
@@ -137,7 +133,6 @@ export default function AutoCompleteBox({
     const selection = $getSelection();
 
     if ($isRangeSelection(selection)) {
-      console.log('helllo');
       const anchor = selection.anchor;
       const node = anchor.getNode();
 
@@ -167,10 +162,6 @@ export default function AutoCompleteBox({
     setSelectedIndex(selectedIndex);
 
     const listItem = itemRefs.current[selectedIndex];
-    const previousItem = itemRefs.current[selectedIndex + 1];
-
-    listItem.classList.add(styles.selected);
-    previousItem.classList.remove(styles.selected);
 
     selectedStringRef.current = listItem.textContent;
 
@@ -186,24 +177,19 @@ export default function AutoCompleteBox({
     setSelectedIndex(selectedIndex);
 
     const listItem = itemRefs.current[selectedIndex];
-    const previousItem = itemRefs.current[selectedIndex - 1];
-    listItem.classList.add(styles.selected);
-    previousItem.classList.remove(styles.selected);
 
     selectedStringRef.current = listItem.textContent;
 
     return false;
   };
 
-  console.log('LOADING REF', isLoadingRef.current);
-  console.log('OPTIONS', options);
   return (
     <div
       ref={boxRef}
       className={styles.autoCompleteBox}
       style={{ top: `${top}px`, left: `${left}px` }}
     >
-      {options.length > 0 && (
+      {isLoadingRef.current === false && (
         <ul>
           {options.map((word, i) => (
             <li

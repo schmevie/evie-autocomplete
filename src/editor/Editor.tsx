@@ -23,7 +23,11 @@ const editorConfig = {
   },
 };
 
-export default function Editor() {
+type EditorParams = {
+  isFunMode: boolean;
+};
+
+export default function Editor({ isFunMode }: EditorParams) {
   return (
     <LexicalComposer initialConfig={editorConfig}>
       <div className="editor-container">
@@ -39,7 +43,7 @@ export default function Editor() {
           />
           <HistoryPlugin />
           <AutoFocusPlugin />
-          <AutoCompletePlugin />
+          <AutoCompletePlugin isFunMode={isFunMode} />
         </div>
       </div>
     </LexicalComposer>

@@ -12,3 +12,8 @@
 .selected {
   color: brown;
 }
+
+.autoCompleteBox ul li:hover {
+  background-color: lightblue;
+  cursor: pointer;
+}

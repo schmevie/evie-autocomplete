@@ -1,6 +1,12 @@
 import Editor from './editor/Editor.tsx';
+import { useState } from 'react';
 
 function App() {
+  const [isFunModeChecked, setFunModeChecked] = useState<boolean>(false);
+
+  const handleFunModeChanged = (event: any) => {
+    setFunModeChecked(event.target.checked);
+  };
   return (
     <>
       <main>
@@ -15,19 +21,23 @@ function App() {
                 <div className="card card-tertiary">
                   <div className="card-header">AutoComplete Editor</div>
                   <div className="card-body bg-white">
-                    <Editor />
+                    <Editor isFunMode={isFunModeChecked} />
                   </div>
                   <div className="card-footer">
                     <div className="d-flex">
-                      <button
-                        className="btn btn-sm mr-2 btn-primary border-dark"
-                        type="button"
-                      >
-                        <span className="btn-text">OK</span>
-                      </button>
-                      <button className="btn btn-sm btn-primary" type="button">
-                        <span className="btn-text">Cancel</span>
-                      </button>
+                      <div className="form-check">
+                        <label className="form-check-label">
+                          <input
+                            className="form-check-input"
+                            checked={isFunModeChecked}
+                            onChange={handleFunModeChanged}
+                            type="checkbox"
+                          />
+                          <span className="form-check-x"></span>
+                          <span className="form-check-sign"></span>
+                          Fun Mode
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
