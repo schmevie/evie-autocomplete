@@ -63,7 +63,7 @@ const makeOptionsFun = function (options: Array<string>) {
     `circling back aggressively`,
     `per my last email`,
     `added to the roadmap (and my nightmares)`,
-    `.pending legal approval`,
+    `pending legal approval`,
     `And this meeting could've been an email`,
     `that's above my pay grade`,
     `just waiting on sign-off`,
