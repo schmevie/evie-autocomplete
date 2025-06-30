@@ -19,7 +19,8 @@ import {
   useRef,
   useCallback,
 } from 'react';
-import AutoCompleteBox from '../../components/AutoComplete/AutoCompleteBox';
+import AutoCompleteBoxPlugin from '../AutoCompleteBoxPlugin';
+// import AutoCompleteBox from '../../components/AutoComplete/AutoCompleteBox';
 import getAutoCompleteSuggestionsMuse from '../../api/autoCompleteService';
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -394,7 +395,7 @@ export const AutoCompletePlugin = function ({
   };
 
   return rectangle ? (
-    <AutoCompleteBox
+    <AutoCompleteBoxPlugin
       options={autoCompleteOptions}
       rectangle={rectangle}
       onUpdateSelected={handleUpdateSelected}

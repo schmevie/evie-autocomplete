@@ -13,7 +13,7 @@ import {
   KEY_TAB_COMMAND,
 } from 'lexical';
 
-type AutoCompleteBoxParams = {
+type AutoCompleteBoxPluginParams = {
   options: string[];
   rectangle: {
     top: number;
@@ -25,12 +25,12 @@ type AutoCompleteBoxParams = {
   isLoadingRef: React.RefObject<boolean>;
 };
 
-export default function AutoCompleteBox({
+export default function AutoCompleteBoxPlugin({
   options,
   rectangle,
   onUpdateSelected,
   isLoadingRef,
-}: AutoCompleteBoxParams): JSX.Element | null {
+}: AutoCompleteBoxPluginParams): JSX.Element | null {
   const [editor] = useLexicalComposerContext();
   const selectedStringRef = useRef('');
   const optionsRef = useRef(options);
@@ -110,11 +110,6 @@ export default function AutoCompleteBox({
     };
   }, [editor, onUpdateSelected]);
 
-  if (!rectangle || !editor) return null;
-
-  const left = rectangle.left;
-  const top = rectangle.y + 15;
-
   const handleSelectionCommands = function (event: KeyboardEvent): boolean {
     const selected = selectedStringRef.current;
 
@@ -182,6 +177,11 @@ export default function AutoCompleteBox({
 
     return false;
   };
+
+  if (!rectangle) return null;
+
+  const left = rectangle.left;
+  const top = rectangle.y + 18;
 
   return (
     <div
