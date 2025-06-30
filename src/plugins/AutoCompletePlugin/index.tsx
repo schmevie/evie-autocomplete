@@ -23,6 +23,17 @@ import AutoCompleteBox from '../../components/AutoComplete/AutoCompleteBox';
 import getAutoCompleteSuggestionsMuse from '../../api/autoCompleteService';
 import { useDebouncedCallback } from 'use-debounce';
 
+interface Rectangle {
+  top: number;
+  left: number;
+  bottom: number;
+  right: number;
+  width: number;
+  height: number;
+  x: number;
+  y: number;
+}
+
 const $findAndGetMatchString = function (text: string): null | string {
   let matchString: null | string = null;
   for (let i = 0; i < text.length; i++) {
@@ -36,12 +47,38 @@ const $findAndGetMatchString = function (text: string): null | string {
 };
 
 const makeOptionsFun = function (options: Array<string>) {
-  const funTags = [`that's what she said`, `ya filthy animal!`, `it's giving`];
+  const funTags = [
+    `ya filthy animal!`,
+    `it's giving`,
+    `that's what she said`,
+    `and that's showbiz, baby 🎭`,
+    `in this economy? 💸`,
+    `in the group chat™`,
+    `written and directed by Greta Gerwig`,
+    `zero notes`,
+    `just like mom used to yell`,
+    `and my therapist said that's progress`,
+    `straight to voicemail`,
+    `circling back aggressively`,
+    `per my last email`,
+    `added to the roadmap (and my nightmares)`,
+    `.pending legal approval`,
+    `And this meeting could've been an email`,
+    `that's above my pay grade`,
+    `just waiting on sign-off`,
+    `hope this helps`,
+    `the client won't notice`,
+    `sent from my iPhone`,
+    `looks fine on my machine`,
+    `to infinity and beyond`,
+    `you got it, dude`,
+    `As if`,
+  ];
 
   return options.map(option => {
     const randomNumber = Math.floor(Math.random() * funTags.length);
     const funTag = funTags[randomNumber];
-    if (randomNumber === 2) {
+    if (randomNumber === 1) {
       return `${funTag} ${option}`;
     }
     return `${option} ${funTag}`;
@@ -52,7 +89,7 @@ const $textNodeTransform = async function (
   node: TextNode,
   editor: LexicalEditor,
   setAutoCompleteOptions: Dispatch<SetStateAction<string[]>>,
-  setRectangle: Dispatch<SetStateAction<any>>,
+  setRectangle: Dispatch<SetStateAction<Rectangle | undefined>>,
   targetAutoCompleteNodeRef: React.RefObject<TextNode | undefined>,
   lastHandledMatchRef: React.RefObject<{ key: string; match: string } | null>,
   isLoadingOptionsRef: React.RefObject<boolean>,
@@ -73,18 +110,21 @@ const $textNodeTransform = async function (
 
   if (matchString !== null) {
     isLoadingOptionsRef.current = true;
-    const invalidCharRegex = /[^a-zA-Z0-9 ]/g;
+
+    //INPUT SANITIZATION
+    const invalidCharRegex = /[^a-zA-Z0-9 ']/g;
     if (invalidCharRegex.test(matchString)) {
-      const cleaned = matchString.replace(invalidCharRegex, '');
+      const sanitizedString = matchString.replace(invalidCharRegex, '');
       const firstHalfString = text.split('<>');
       if (firstHalfString.length > 0) {
-        const constructedString = firstHalfString[0] + '<>' + cleaned;
+        const constructedString = firstHalfString[0] + '<>' + sanitizedString;
         node.setTextContent(constructedString);
         node.select(node.getTextContentSize());
-        matchString = cleaned;
+        matchString = sanitizedString;
       }
     }
 
+    //FETCH AUTO COMPLETE OPTIONS
     if (matchString === '') {
       setAutoCompleteOptions([]);
       isLoadingOptionsRef.current = false;
@@ -92,6 +132,7 @@ const $textNodeTransform = async function (
       debouncedFetchSuggestions(matchString);
     }
 
+    //SET AUTOCOMPLETE BOX COORDINATES
     const selection = window.getSelection();
 
     if (selection && selection.rangeCount > 0) {
@@ -126,7 +167,7 @@ const $textNodeTransform = async function (
 const useAutoComplete = function (
   editor: LexicalEditor,
   setAutoCompleteOptions: Dispatch<SetStateAction<string[]>>,
-  setRectangle: Dispatch<SetStateAction<any>>,
+  setRectangle: Dispatch<SetStateAction<Rectangle | undefined>>,
   isLoadingOptionsRef: React.RefObject<boolean>,
   targetAutoCompleteNodeRef: React.RefObject<TextNode | undefined>,
   lastHandledMatchRef: React.RefObject<{ key: string; match: string } | null>,
@@ -145,7 +186,6 @@ const useAutoComplete = function (
         const funOptions = makeOptionsFun(
           getAutoCompleteOptionsFromApi.options
         );
-        console.log(funOptions);
         setAutoCompleteOptions(funOptions);
       } else {
         setAutoCompleteOptions(getAutoCompleteOptionsFromApi.options);
@@ -161,6 +201,8 @@ const useAutoComplete = function (
         'AutoComplete Plugin: AutoCompleteEntryNote not registered'
       );
     }
+
+    //REGISTER EVENTS/TRANSFORMS ON EDITOR - called once
     editor.registerNodeTransform(TextNode, (node: TextNode) => {
       $textNodeTransform(
         node,
@@ -215,20 +257,6 @@ const useAutoComplete = function (
               newTextNode.select();
               return true;
             }
-            // if (event.key === 'ArrowLeft') {
-            //   selectedNode.selectStart();
-            // }
-            // if (event.key === 'ArrowRight') {
-            //   console.log('ARROW RIGHT');
-            //   console.log(selectedNode.getNextSibling());
-            //   // const nextSibling = selectedNode.getNextSibling();
-            //   // if (nextSibling) {
-            //   //   nextSibling.selectEnd();
-            //   //   return true;
-            //   // }
-            //   selectedNode.selectEnd();
-            // }
-
             const allowed = ['Backspace', ' ', 'ArrowRight', 'ArrowLeft'];
             if (!allowed.includes(event.key)) {
               event.preventDefault();
@@ -260,13 +288,14 @@ export const AutoCompletePlugin = function ({
 }: AutoCompletePluginParams): JSX.Element | null {
   const [editor] = useLexicalComposerContext();
   const [autoCompleteOptions, setAutoCompleteOptions] = useState<string[]>([]);
-  const [rectangle, setRectangle] = useState<any>();
+  const [rectangle, setRectangle] = useState<Rectangle | undefined>(undefined);
   const targetAutoCompleteNodeRef = useRef<TextNode | undefined>(undefined);
   const isLoadingOptionsRef = useRef<boolean>(false);
   const lastHandledMatchRef = useRef<{ key: string; match: string } | null>(
     null
   );
 
+  //SET USE EFFECT()
   useAutoComplete(
     editor,
     setAutoCompleteOptions,
@@ -289,12 +318,12 @@ export const AutoCompletePlugin = function ({
           lastHandledMatchRef.current = { key: targetNode.getKey(), match };
         }
 
-        const autoCommandText = targetNode.getTextContent();
-        const autoCommandIndex = autoCommandText.indexOf('<>');
+        const targetNodeText = targetNode.getTextContent();
+        const targetNodeIndex = targetNodeText.indexOf('<>');
 
-        if (autoCommandIndex === -1) return;
+        if (targetNodeIndex === -1) return;
 
-        const [left, rightPortion] = targetNode.splitText(autoCommandIndex);
+        const [left, rightPortion] = targetNode.splitText(targetNodeIndex);
 
         if (left && !rightPortion) {
           const [middle, right] = left.splitText(2);
