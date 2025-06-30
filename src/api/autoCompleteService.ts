@@ -38,7 +38,7 @@ const getAutoCompleteSuggestionsMuse = async (
   try {
     const { autoCompleteWord } = params;
     const response = await fetch(
-      `https://api.datamuse.com/sug?s=${autoCompleteWord}`,
+      `https://api.datamuse.com/sug?s=${encodeURIComponent(autoCompleteWord)}`,
       {
         method: 'GET',
         headers: {
