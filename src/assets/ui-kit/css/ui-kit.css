@@ -3730,6 +3730,13 @@ button.section-black:focus {
      background: #008081;
      color: white;
  }
+ .card-tertiary .card-secondary .card-header {
+    background: #1E90FF;
+    color: white;
+  }
+  .card-tertiary .card-secondary .card-body ul {
+    margin-bottom: 0rem;
+  }
 
  .card-tertiary .card-header {
      background: #000181;

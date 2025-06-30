@@ -189,28 +189,33 @@ export default function AutoCompleteBoxPlugin({
       className={styles.autoCompleteBox}
       style={{ top: `${top}px`, left: `${left}px` }}
     >
-      {isLoadingRef.current === false && (
-        <ul>
-          {options.map((word, i) => (
-            <li
-              onClick={() => {
-                onUpdateSelected(word);
-              }}
-              className={i === selectedIndex ? styles.selected : ''}
-              ref={el => {
-                itemRefs.current[i] = el;
-              }}
-              key={i}
-            >
-              {word}
-            </li>
-          ))}
-        </ul>
-      )}
-      {isLoadingRef.current === true && <p>LOADING</p>}
-      {isLoadingRef.current === false && options.length === 0 && (
-        <p>NO SUGGESTIONS FOUND</p>
-      )}
+      <div className="card card-secondary">
+        <div className="card-header text-center">AutoComplete Suggestions</div>
+        <div className="card-body">
+          {isLoadingRef.current === false && (
+            <ul>
+              {options.map((word, i) => (
+                <li
+                  onClick={() => {
+                    onUpdateSelected(word);
+                  }}
+                  className={i === selectedIndex ? styles.selected : ''}
+                  ref={el => {
+                    itemRefs.current[i] = el;
+                  }}
+                  key={i}
+                >
+                  {word}
+                </li>
+              ))}
+            </ul>
+          )}
+          {isLoadingRef.current === true && <p>LOADING</p>}
+          {isLoadingRef.current === false && options.length === 0 && (
+            <p>NO SUGGESTIONS FOUND</p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
