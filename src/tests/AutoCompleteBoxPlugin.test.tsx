@@ -1,6 +1,7 @@
 /// <reference types="vitest/globals" />
 /// <reference types="@testing-library/jest-dom" />
-import { render, fireEvent, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/dom';
 import AutoCompleteBoxPlugin from '../plugins/AutoCompleteBoxPlugin';
 
 // Mock Lexical editor context
