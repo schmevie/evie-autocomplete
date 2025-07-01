@@ -1,46 +1,51 @@
-import {AutoFocusPlugin} from '@lexical/react/LexicalAutoFocusPlugin';
-import {LexicalComposer} from '@lexical/react/LexicalComposer';
-import {ContentEditable} from '@lexical/react/LexicalContentEditable';
-import {LexicalErrorBoundary} from '@lexical/react/LexicalErrorBoundary';
-import {HistoryPlugin} from '@lexical/react/LexicalHistoryPlugin';
-import {PlainTextPlugin} from '@lexical/react/LexicalPlainTextPlugin';
+import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
+import { LexicalComposer } from '@lexical/react/LexicalComposer';
+import { ContentEditable } from '@lexical/react/LexicalContentEditable';
+import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
+import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
+import { AutoCompletePlugin } from '../plugins/AutoCompletePlugin';
+import { AutoCompleteEntryNode } from '../nodes/AutoCompleteEntryNode';
+import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 
 const editorConfig = {
-    namespace: 'Editor',
-    nodes: [],
-    // Handling of errors during update
-    onError(error: Error) {
-        throw error;
-    },
-    // The editor theme
-    theme: {
-            ltr: 'ltr',
-            paragraph: 'editor-paragraph',
-            rtl: 'rtl',
-        },
+  namespace: 'Editor',
+  nodes: [AutoCompleteEntryNode],
+  // Handling of errors during update
+  onError(error: Error) {
+    throw error;
+  },
+  // The editor theme
+  theme: {
+    ltr: 'ltr',
+    paragraph: 'editor-paragraph',
+    rtl: 'rtl',
+    autoCompleteEntry: 'autocomplete-entry',
+  },
 };
 
-export default function Editor() {
-    return (
-        <LexicalComposer initialConfig={editorConfig}>
-            <div className="editor-container">
-                <div className="editor-inner">
-                    <PlainTextPlugin
-                        contentEditable={
-                        <ContentEditable
-                            className="editor-input"
-                            suppressContentEditableWarning
-                        />}
-                        ErrorBoundary={LexicalErrorBoundary}
+type EditorParams = {
+  isFunMode: boolean;
+};
 
-                    />
-                    <HistoryPlugin />
-                    <AutoFocusPlugin />
-                    {
-                        //Place custom plugins in the ./plugins folder
-                    }
-                </div>
-            </div>
-        </LexicalComposer>
-    );
+export default function Editor({ isFunMode }: EditorParams) {
+  return (
+    <LexicalComposer initialConfig={editorConfig}>
+      <div className="editor-container">
+        <div className="editor-inner">
+          <RichTextPlugin
+            contentEditable={
+              <ContentEditable
+                className="editor-input"
+                suppressContentEditableWarning
+              />
+            }
+            ErrorBoundary={LexicalErrorBoundary}
+          />
+          <HistoryPlugin />
+          <AutoFocusPlugin />
+          <AutoCompletePlugin isFunMode={isFunMode} />
+        </div>
+      </div>
+    </LexicalComposer>
+  );
 }
